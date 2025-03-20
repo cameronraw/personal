@@ -1,8 +1,10 @@
+use chrono::Local;
 use leptos::prelude::*;
 
 /// Footer component
 #[component]
 pub fn Footer() -> impl IntoView {
+    let current_year = Local::now().format("%Y").to_string();
     view! {
         <footer class="bg-neutralDark text-white py-8">
             <div class="container mx-auto px-4">
@@ -21,7 +23,7 @@ pub fn Footer() -> impl IntoView {
                     </div>
                 </div>
                 <div class="mt-8 pt-4 border-t border-gray-700 text-center text-gray-400">
-                    <p>"© " {2024} " Cameron Raw. All rights reserved."</p>
+                    <p>"© " {current_year} " Cameron Raw. All rights reserved."</p>
                 </div>
             </div>
         </footer>

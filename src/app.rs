@@ -6,7 +6,7 @@ use leptos_router::{
 };
 
 use crate::components::{Footer, Header};
-use crate::pages::{Admin, HomePage, NotFound};
+use crate::pages::{ArticleDetailPage, ArticlesPage, HomePage, NotFound};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -19,13 +19,13 @@ pub fn App() -> impl IntoView {
 
         <Router>
             <Routes fallback=move || "Not found.">
-                <Route path=StaticSegment("admin") view=Admin/>
             <Route path=StaticSegment("") view=|| view! {
                 <div class="min-h-screen flex flex-col bg-gray-50">
                     <Header/>
                     <main class="flex-grow">
                         <Routes fallback=move || "Not found.">
                             <Route path=StaticSegment("") view=HomePage/>
+                            <Route path=StaticSegment("articles") view=ArticlesPage/>
                             <Route path=WildcardSegment("any") view=NotFound/>
                         </Routes>
                     </main>
