@@ -1,12 +1,14 @@
+use crate::{
+    components::ArticleCard,
+    models::article::{Article, ArticlesResponse},
+};
 use leptos::prelude::*;
 use leptos_meta::Title;
-use leptos_router::components::Outlet;
 use serde_json::Value;
-use crate::models::article::{Article, ArticlesResponse};
 
 #[server]
 pub async fn get_all_articles() -> Result<Value, ServerFnError> {
-    let response = reqwest::get("http://localhost:1337/api/articles")
+    let response = reqwest::get("http://localhost:1337/api/articles?populate=image")
         .await?
         .json()
         .await?;
@@ -45,7 +47,7 @@ pub fn ArticlesPage() -> impl IntoView {
                                         } else {
                                             articles.data.into_iter().map(|article| {
                                                 view! {
-                                                    <ArticleListItem article=article />
+                                                    <ArticleCard article=article />
                                                 }
                                             }).collect_view().into_any()
                                         }
@@ -81,7 +83,6 @@ pub fn ArticlesPage() -> impl IntoView {
 
 #[component]
 fn ArticleListItem(article: Article) -> impl IntoView {
-    let article_slug = article.title.to_lowercase().replace(" ", "-");
     let article_url = format!("articles/{}", article.document_id);
 
     view! {

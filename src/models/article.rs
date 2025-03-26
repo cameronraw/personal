@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -7,7 +9,7 @@ pub struct Article {
     pub title: String,
     pub subtitle: Option<String>,
     pub content: String,
-    pub image: Option<String>,
+    pub image: Option<Image>,
     pub tags: Option<String>,
     pub published_at: Option<String>,
     pub updated_at: Option<String>,
@@ -15,11 +17,9 @@ pub struct Article {
 
 impl Article {
     pub fn get_tags(&self) -> Option<Vec<String>> {
-        if let Some(tags) = &self.tags {
-            Some(tags.split(',').map(|tag| tag.to_string()).collect())
-        } else {
-            None
-        }
+        self.tags
+            .as_ref()
+            .map(|tags| tags.split(',').map(|tag| tag.to_string()).collect())
     }
 
     pub fn get_published_date(&self) -> Option<String> {
@@ -49,4 +49,16 @@ pub struct ArticleResponse {
 #[derive(Deserialize)]
 pub struct ArticlesResponse {
     pub data: Vec<Article>,
+}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Image {
+    pub formats: HashMap<String, ImageFormat>,
+}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ImageFormat {
+    pub name: String,
+    pub mime: String,
+    pub width: u32,
+    pub height: u32,
+    pub url: String,
 }

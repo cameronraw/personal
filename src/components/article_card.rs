@@ -1,80 +1,10 @@
-use crate::models::article::{Article, ArticlesResponse};
 use leptos::prelude::*;
-use serde_json::Value;
+use leptos::{component, view, IntoView};
 
-#[server]
-pub async fn get_articles() -> Result<Value, ServerFnError> {
-    let response = reqwest::get("http://localhost:1337/api/articles?populate=image")
-        .await?
-        .json()
-        .await?;
-
-    Ok(response)
-}
-
-fn handle_article_resource(
-    article_resource: Resource<Result<Value, ServerFnError>>,
-) -> impl IntoView {
-    view! {
-            <Suspense fallback=move || view! {<div class="text-center">{"Loading...".to_string()}</div>}.into_any()>
-                {move || match article_resource.get() {
-                    Some(Ok(article_json)) => {
-                        leptos::logging::log!("Articles: {}", article_json);
-                        match serde_json::from_value::<ArticlesResponse>(article_json) {
-                            Ok(articles) => articles.data.into_iter().map(|article| {
-                                view! {
-                                    <ArticleCard article />
-                                }
-                            }).collect_view().into_any(),
-                            Err(parse_error) => {
-                                leptos::logging::log!("Error parsing articles: {:?}", parse_error);
-                                view! {<div class="text-center">{"Error parsing articles".to_string()}</div>}.into_any()} 
-                            }
-                    },
-                    Some(Err(_err)) => view! {<div class="text-center">{"Error loading articles".to_string()}</div>}.into_any(),
-                    None => view! {<div class="text-center">{"Loading...".to_string()}</div>}.into_any()
-
-                }}
-            </Suspense>
-        }.into_any()
-}
+use crate::models::article::Article;
 
 #[component]
-pub fn ArticlesSection() -> impl IntoView {
-    let article_resource = Resource::new(|| (), |_| get_articles());
-
-    let async_result = move || {
-        let articles_view = handle_article_resource(article_resource);
-        view! {
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {articles_view}
-            </div>
-        }
-    };
-
-    view! {
-            <section id="articles" class="py-16 bg-white">
-                <div class="container mx-auto px-4">
-                    <div class="flex justify-between items-center mb-12">
-                        <div>
-                            <h2 class="text-3xl font-bold mb-2 text-primary">"Recent Articles"</h2>
-                            <p class="text-lg text-neutralDark max-w-2xl">"I write about software development, best practices, and emerging technologies."</p>
-                        </div>
-                        <a href="/articles" class="inline-flex items-center text-primary font-medium hover:underline">
-                            "View All Articles"
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </a>
-                    </div>
-                    {async_result}
-                </div>
-            </section>
-    }.into_any()
-}
-
-#[component]
-fn ArticleCard(article: Article) -> impl IntoView {
+pub fn ArticleCard(article: Article) -> impl IntoView {
     let article_url = format!("/articles/{}", article.document_id);
 
     view! {

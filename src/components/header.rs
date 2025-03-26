@@ -9,10 +9,10 @@ pub fn Header() -> impl IntoView {
                 <div class="text-xl font-bold">Cameron Raw</div>
                 <nav>
                     <ul class="flex space-x-6">
-                        <li><a href="#" class="hover:text-gray-200 transition-colors">Home</a></li>
-                        <li><a href="#projects" class="hover:text-gray-200 transition-colors">Projects</a></li>
-                        <li><a href="#articles" class="hover:text-gray-200 transition-colors">Articles</a></li>
-                        <li><a href="#contact" class="hover:text-gray-200 transition-colors">Contact</a></li>
+                        <li><a href="/" class="hover:text-gray-200 transition-colors">Home</a></li>
+                        <li><a href="/projects" class="hover:text-gray-200 transition-colors">Projects</a></li>
+                        <li><a href="/articles" class="hover:text-gray-200 transition-colors">Articles</a></li>
+                        <li><a href="/contact" class="hover:text-gray-200 transition-colors">Contact</a></li>
                     </ul>
                 </nav>
             </div>
