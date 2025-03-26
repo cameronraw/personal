@@ -1,28 +1,27 @@
 use leptos::prelude::*;
-
-use crate::models::article::Article;
+use serde_json::Value;
+use crate::models::article::{Article, ArticlesResponse};
 
 #[server]
-pub async fn get_articles() -> Result<String, ServerFnError> {
-    let response = reqwest::get("http://localhost:1337/articles")
+pub async fn get_articles() -> Result<Value, ServerFnError> {
+    let response = reqwest::get("http://localhost:1337/api/articles")
         .await?
-        .text()
+        .json()
         .await?;
 
     Ok(response)
 }
 
 fn handle_article_resource(
-    article_resource: Resource<Result<String, ServerFnError>>,
+    article_resource: Resource<Result<Value, ServerFnError>>,
 ) -> impl IntoView {
-    leptos::logging::log!("Article Resource: {:?}", article_resource);
     view! {
             <Suspense fallback=move || view! {<div class="text-center">{"Loading...".to_string()}</div>}.into_any()>
                 {move || match article_resource.get() {
-                    Some(Ok(article_string)) => {
-                        leptos::logging::log!("Articles: {}", article_string);
-                        match serde_json::from_str::<Vec<Article>>(&article_string) {
-                            Ok(articles) => articles.into_iter().map(|article| {
+                    Some(Ok(article_json)) => {
+                        leptos::logging::log!("Articles: {}", article_json);
+                        match serde_json::from_value::<ArticlesResponse>(article_json) {
+                            Ok(articles) => articles.data.into_iter().map(|article| {
                                 view! {
                                     <ArticleCard article />
                                 }
@@ -32,7 +31,7 @@ fn handle_article_resource(
                                 view! {<div class="text-center">{"Error parsing articles".to_string()}</div>}.into_any()} 
                             }
                     },
-                    Some(Err(_)) => view! {<div class="text-center">{"Error loading articles".to_string()}</div>}.into_any(),
+                    Some(Err(_err)) => view! {<div class="text-center">{"Error loading articles".to_string()}</div>}.into_any(),
                     None => view! {<div class="text-center">{"Loading...".to_string()}</div>}.into_any()
 
                 }}
@@ -76,8 +75,7 @@ pub fn ArticlesSection() -> impl IntoView {
 
 #[component]
 fn ArticleCard(article: Article) -> impl IntoView {
-    let article_slug = article.title.to_lowercase().replace(" ", "-");
-    let article_url = format!("/articles/{}", article_slug);
+    let article_url = format!("/articles/{}", article.document_id);
     
     view! {
         <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 transition-all hover:shadow-md hover:border-primary/20 group">

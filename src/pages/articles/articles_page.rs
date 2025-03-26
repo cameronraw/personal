@@ -1,13 +1,14 @@
 use leptos::prelude::*;
 use leptos_meta::Title;
-
-use crate::models::article::Article;
+use leptos_router::components::Outlet;
+use serde_json::Value;
+use crate::models::article::{Article, ArticlesResponse};
 
 #[server]
-pub async fn get_all_articles() -> Result<String, ServerFnError> {
-    let response = reqwest::get("http://localhost:1337/articles")
+pub async fn get_all_articles() -> Result<Value, ServerFnError> {
+    let response = reqwest::get("http://localhost:1337/api/articles")
         .await?
-        .text()
+        .json()
         .await?;
 
     Ok(response)
@@ -32,17 +33,17 @@ pub fn ArticlesPage() -> impl IntoView {
                         </div>
                     }>
                         {move || match article_resource.get() {
-                            Some(Ok(article_string)) => {
-                                match serde_json::from_str::<Vec<Article>>(&article_string) {
+                            Some(Ok(article_json)) => {
+                                match serde_json::from_value::<ArticlesResponse>(article_json) {
                                     Ok(articles) => {
-                                        if articles.is_empty() {
+                                        if articles.data.is_empty() {
                                             view! {
                                                 <div class="col-span-full text-center py-12">
                                                     <p class="text-xl text-gray-600">"No articles found."</p>
                                                 </div>
                                             }.into_any()
                                         } else {
-                                            articles.into_iter().map(|article| {
+                                            articles.data.into_iter().map(|article| {
                                                 view! {
                                                     <ArticleListItem article=article />
                                                 }
@@ -59,7 +60,7 @@ pub fn ArticlesPage() -> impl IntoView {
                                     }
                                 }
                             },
-                            Some(Err(_)) => view! {
+                            Some(Err(_err)) => view! {
                                 <div class="col-span-full text-center py-12">
                                     <p class="text-xl text-red-600">"Error loading articles"</p>
                                 </div>
@@ -81,7 +82,7 @@ pub fn ArticlesPage() -> impl IntoView {
 #[component]
 fn ArticleListItem(article: Article) -> impl IntoView {
     let article_slug = article.title.to_lowercase().replace(" ", "-");
-    let article_url = format!("/articles/{}", article_slug);
+    let article_url = format!("articles/{}", article.document_id);
 
     view! {
         <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 transition-all hover:shadow-md hover:border-primary/20 group">

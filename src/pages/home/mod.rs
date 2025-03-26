@@ -13,6 +13,7 @@ use projects_section::ProjectsSection;
 
 #[component]
 pub fn HomePage() -> impl IntoView {
+
     view! {
         <HeroSection />
         <AboutSection />

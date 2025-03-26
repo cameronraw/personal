@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Article {
+    pub document_id: String,
     pub title: String,
     pub subtitle: Option<String>,
     pub content: String,
@@ -39,4 +41,12 @@ impl Article {
             None
         }
     }
+}
+#[derive(Deserialize)]
+pub struct ArticleResponse {
+    pub data: Article,
+}
+#[derive(Deserialize)]
+pub struct ArticlesResponse {
+    pub data: Vec<Article>,
 }
